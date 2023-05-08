@@ -130,6 +130,9 @@ static EFI_STATUS try_gpt(
                 if (entry->EndingLBA < entry->StartingLBA) /* Bogus? */
                         continue;
 
+                if (entry->Attributes & (UINT64_C(1) << 63))
+                        continue;
+
                 *ret_hd = (HARDDRIVE_DEVICE_PATH) {
                         .Header = {
                                 .Type = MEDIA_DEVICE_PATH,
