@@ -1222,11 +1222,12 @@ static int dissect_image(
                                          * let the newest version win. This permits a simple A/B versioning
                                          * scheme in OS images. */
 
-                                        //if (compare_arch(type.arch, m->partitions[type.designator].architecture) < 0)
-                                        //        continue;
-
-                                        if (!partition_designator_is_versioned(type.designator) ||
-                                            strverscmp_improved(m->partitions[type.designator].label, label) >= 0)
+                                        c = compare_arch(type.arch, m->partitions[type.designator].architecture);
+                                        if (c < 0) /* the arch we already found is better than the one we found now */
+                                                continue;
+                                        if (c == 0 && /* same arch? then go by version in label */
+                                            (!partition_designator_is_versioned(type.designator) ||
+                                             strverscmp_improved(label, m->partitions[type.designator].label) <= 0))
                                                 continue;
 
                                         dissected_partition_done(m->partitions + type.designator);
