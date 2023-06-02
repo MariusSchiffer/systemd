@@ -1217,6 +1217,7 @@ static int dissect_image(
                                 }
 
                                 if (m->partitions[type.designator].found) {
+                                        int c;
                                         /* For most partition types the first one we see wins. Except for the
                                          * rootfs and /usr, where we do a version compare of the label, and
                                          * let the newest version win. This permits a simple A/B versioning
