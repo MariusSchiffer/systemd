@@ -82,7 +82,7 @@ static EFI_STATUS try_gpt(
         EFI_STATUS err;
         uint32_t crc32;
         size_t size;
-        char16_t last_label[36] = {0};
+        char16_t* last_label;
         bool found = false;
 
         assert(block_io);
@@ -136,7 +136,7 @@ static EFI_STATUS try_gpt(
                 //        continue;
 
                 // Skip if version is older than a partition that was already found
-                if (strverscmp_improved(entry->PartitionName, last_label) <= 0)
+                if (found && strverscmp_improved(entry->PartitionName, last_label) <= 0)
                         continue;
 
                 *ret_hd = (HARDDRIVE_DEVICE_PATH) {
@@ -153,6 +153,7 @@ static EFI_STATUS try_gpt(
                 };
                 memcpy(ret_hd->Signature, &entry->UniquePartitionGUID, sizeof(ret_hd->Signature));
 
+                last_label = entry->PartitionName;
                 found = true;
         }
 
