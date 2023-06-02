@@ -22,6 +22,7 @@ bool partition_designator_is_versioned(PartitionDesignator d) {
          * comparing the partition labels. */
 
         return IN_SET(d,
+                      PARTITION_XBOOTLDR,
                       PARTITION_ROOT,
                       PARTITION_USR,
                       PARTITION_ROOT_VERITY,

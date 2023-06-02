@@ -82,6 +82,8 @@ static EFI_STATUS try_gpt(
         EFI_STATUS err;
         uint32_t crc32;
         size_t size;
+        char16_t last_label[36] = {0};
+        bool found = false;
 
         assert(block_io);
         assert(ret_hd);
@@ -130,6 +132,13 @@ static EFI_STATUS try_gpt(
                 if (entry->EndingLBA < entry->StartingLBA) /* Bogus? */
                         continue;
 
+                //if (entry->Attributes & ((uint64_t)1 << 63)) /* No automount */
+                //        continue;
+
+                // Skip if version is older than a partition that was already found
+                if (strverscmp_improved(entry->PartitionName, last_label) <= 0)
+                        continue;
+
                 *ret_hd = (HARDDRIVE_DEVICE_PATH) {
                         .Header = {
                                 .Type = MEDIA_DEVICE_PATH,
@@ -144,8 +153,11 @@ static EFI_STATUS try_gpt(
                 };
                 memcpy(ret_hd->Signature, &entry->UniquePartitionGUID, sizeof(ret_hd->Signature));
 
-                return EFI_SUCCESS;
+                found = true;
         }
+
+        if (found)
+                return EFI_SUCCESS;
 
         /* This GPT was fully valid, but we didn't find what we are looking for. This
          * means there's no reason to check the second copy of the GPT header */
